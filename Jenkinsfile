@@ -1,8 +1,10 @@
+
 pipeline {
     agent any
 
     options {
         skipDefaultCheckout(true)
+        disableConcurrentBuilds()
     }
 
     environment {
@@ -24,7 +26,7 @@ pipeline {
             steps {
                 script {
                     dockerImage = docker.build(
-                        registry + ":${env.BUILD_NUMBER}"
+                        "${env.registry}:${env.BUILD_NUMBER}"
                     )
                 }
             }
@@ -43,10 +45,41 @@ pipeline {
                 script {
                     docker.withRegistry(
                         'https://index.docker.io/v1/',
-                        registryCredential
+                        env.registryCredential
                     ) {
                         dockerImage.push()
                     }
+                }
+            }
+        }
+
+        stage('Deploy image') {
+            steps {
+                script {
+                    def imageName =
+                        "${env.registry}:${env.BUILD_NUMBER}"
+
+                    echo "===== DEPLOYMENT START ====="
+
+                    bat '''
+                        @echo off
+                        docker container inspect tp4-app >NUL 2>&1
+                        if not errorlevel 1 docker rm -f tp4-app
+                    '''
+
+                    echo "Pulling Docker image..."
+
+                    bat "docker pull ${imageName}"
+
+                    echo "Starting new container..."
+
+                    bat "docker run -d --name tp4-app -p 8081:80 ${imageName}"
+
+                    echo "Checking deployment..."
+
+                    bat 'docker ps --filter "name=tp4-app"'
+
+                    echo "===== DEPLOYMENT FINISHED ====="
                 }
             }
         }
