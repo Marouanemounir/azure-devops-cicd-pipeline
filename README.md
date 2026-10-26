@@ -14,7 +14,8 @@ The solution follows modern DevOps principles, including Infrastructure as a Ser
 
 ## Architecture
 
-![Azure CI/CD Architecture](docs/architecture/Azure CI_CD Application Architecture.png)
+<img width="1672" height="941" alt="Azure CI_CD Application Architecture" src="https://github.com/user-attachments/assets/4bfd5908-29ee-47ab-a167-ca58c4274c34" />
+
 
 The architecture consists of the following components:
 
